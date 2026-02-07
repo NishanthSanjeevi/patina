@@ -227,11 +227,13 @@ impl<P: PlatformInfo> PiDispatcher<P> {
             let driver_candidates: Vec<_> = dispatcher.pending_drivers.drain(..).collect();
             let mut scheduled_driver_candidates = Vec::new();
             for mut candidate in driver_candidates {
-                log::debug!(target: "patina_internal_depex", "Evaluating depex for candidate: {:?}", guid_fmt!(candidate.file_name));
+                log::info!("Evaluating depex for candidate: {:?}", guid_fmt!(candidate.file_name));
+                log::info!("Candidate depex expression: {:?}", candidate.depex);
                 let depex_satisfied = match candidate.depex {
                     Some(ref mut depex) => depex.eval(&PROTOCOL_DB.registered_protocols()),
                     None => dispatcher.arch_protocols_available,
                 };
+                log::info!("Depex satisifed for candidate: {:?} = {}", guid_fmt!(candidate.file_name), depex_satisfied);
 
                 if depex_satisfied {
                     scheduled_driver_candidates.push(candidate)
@@ -261,7 +263,7 @@ impl<P: PlatformInfo> PiDispatcher<P> {
                 })
                 .collect();
         }
-        log::info!("Depex evaluation complete, scheduled {:} drivers", scheduled.len());
+        log::info!("NS:Depex evaluation complete, scheduled {:} drivers", scheduled.len());
 
         let mut dispatch_attempted = false;
         for mut driver in scheduled {
@@ -346,7 +348,7 @@ impl<P: PlatformInfo> PiDispatcher<P> {
                         if let Some(fv_name_guid) = fv_name_guid
                             && self.is_fv_already_installed(fv_name_guid.into_inner())
                         {
-                            log::debug!(
+                            log::info!(
                                 "Skipping FV file {:?} - FV with name GUID {:?} is already installed",
                                 guid_fmt!(candidate.file_name),
                                 guid_fmt!(fv_name_guid)
