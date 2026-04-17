@@ -932,8 +932,14 @@ impl<P: super::PlatformInfo> super::PiDispatcher<P> {
         perf_image_start_end(image_handle, create_performance_measurement);
 
         match status {
-            efi::Status::SUCCESS => Ok(()),
-            err => Err(err),
+            efi::Status::SUCCESS => {
+                log::info!("Image {image_handle:?} started successfully.");
+                Ok(())
+            },
+            err => {
+                log::error!("Image {image_handle:?} failed to start with status: {err:x?}");
+                Err(err)
+            },
         }
     }
 
